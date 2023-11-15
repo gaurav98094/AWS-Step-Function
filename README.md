@@ -26,3 +26,10 @@ Here are some key features and concepts associated with AWS Step Functions:
 8. **Event-Driven Workflow:** Step Functions supports event-driven architectures, allowing you to trigger state machines in response to events from other AWS services or custom sources.
 
 AWS Step Functions simplifies the development of distributed applications by providing a reliable and scalable way to coordinate the components of your application, making it easier to build and maintain complex workflows in a serverless environment.
+
+<br>
+
+
+# State Types
+
+<img src="images/state_type.jpg">
