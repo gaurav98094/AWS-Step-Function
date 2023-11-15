@@ -1,0 +1,16 @@
+{
+    "Comment":"Basics of ASL",
+    "StartAt" : "input",
+    "TimeOutSeconds" : 5,
+    "States" : {
+        "input" : {
+            "Type" : "Pass",
+            "Next" : "Wait"
+        },
+        "Wait" : {
+            "Type" : "Wait",
+            "Seconts" : 5,
+            "End" : true
+        }
+    }
+}
