@@ -1,0 +1,84 @@
+{
+    "Comment": "A description of my state machine",
+    "StartAt": "Lambda Invoke",
+    "States": {
+      "Lambda Invoke": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::lambda:invoke",
+        "OutputPath": "$",
+        "Parameters": {
+          "Payload.$": "$",
+          "FunctionName": "arn:aws:lambda:ap-south-1:782514869483:function:lambda1:$LATEST"
+        },
+        "Retry": [
+          {
+            "ErrorEquals": [
+              "Lambda.ServiceException",
+              "Lambda.AWSLambdaException",
+              "Lambda.SdkClientException",
+              "Lambda.TooManyRequestsException"
+            ],
+            "IntervalSeconds": 1,
+            "MaxAttempts": 3,
+            "BackoffRate": 2
+          }
+        ],
+        "Next": "Choice",
+        "ResultPath": "$.taskResult"
+      },
+      "Choice": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "Variable": "$.taskResult.Payload.validate",
+            "BooleanEquals": true,
+            "Next": "DynamoDB PutItem"
+          }
+        ],
+        "Default": "SNS Publish",
+        "InputPath": "$"
+      },
+      "DynamoDB PutItem": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::dynamodb:putItem",
+        "Parameters": {
+          "TableName": "demoTable",
+          "Item": {
+            "id": {
+              "S.$": "$.name"
+            },
+            "phoneno": {
+              "S.$": "$.phoneno"
+            }
+          }
+        },
+        "Next": "SNS Publish (1)",
+        "ResultPath": "$.taskResult"
+      },
+      "SNS Publish (1)": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::sns:publish",
+        "Parameters": {
+          "TopicArn": "arn:aws:sns:ap-south-1:782514869483:SendMail",
+          "Message": {
+            "message": "Passed",
+            "Name.$": "$.name"
+          }
+        },
+        "End": true,
+        "InputPath": "$"
+      },
+      "SNS Publish": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::sns:publish",
+        "Parameters": {
+          "TopicArn": "arn:aws:sns:ap-south-1:782514869483:SendMail",
+          "Message": {
+            "message": "Failed",
+            "validate.$": "$.taskResult.Payload.validate"
+          }
+        },
+        "End": true
+      }
+    }
+  }
